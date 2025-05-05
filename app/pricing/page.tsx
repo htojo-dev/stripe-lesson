@@ -17,6 +17,7 @@ import { cookies } from "next/headers";
 import { Database } from "@/lib/database.types";
 import SubscripitonButton from "@/components/checkout/SubscriptionButton";
 import AuthServerButton from "@/components/auth/AuthServerButton";
+import Link from "next/link";
 
 interface Plan {
   id: string;
@@ -64,9 +65,11 @@ const PricingPage = async () => {
     getProfileData(supabase),
   ]);
 
-  const showSubscribeButton = !!user.session && profile?.is_subscribed === false;
+  const showSubscribeButton =
+    !!user.session && profile?.is_subscribed === false;
   const showCreateAccountButton = !user.session;
-  const showManageSubscriptionButton = !!user.session && profile?.is_subscribed === true;
+  const showManageSubscriptionButton =
+    !!user.session && profile?.is_subscribed === true;
 
   return (
     <div className="w-full max-w-3xl mx-auto py-16 flex justify-around">
@@ -85,7 +88,9 @@ const PricingPage = async () => {
             {showSubscribeButton && <SubscripitonButton planId={plan.id} />}
             {showCreateAccountButton && <AuthServerButton />}
             {showManageSubscriptionButton && (
-              <Button>サブスクリプション管理する</Button>
+              <Button>
+                <Link href="/dashboard">サブスクリプション管理する</Link>
+              </Button>
             )}
           </CardFooter>
         </Card>

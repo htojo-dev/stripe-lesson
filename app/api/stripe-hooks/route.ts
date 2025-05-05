@@ -22,6 +22,8 @@ export async function POST(req: NextRequest) {
       signature!,
       endpointSecret!
     );
+
+    console.log(event);
     switch (event.type) {
       case "customer.subscription.created":
         const customerSubscriptionCreated = event.data.object;
@@ -33,15 +35,45 @@ export async function POST(req: NextRequest) {
           })
           .eq("stripe_customer", event.data.object.customer);
         break;
-      case "customer.discount.deleted":
+      case "customer.subscription.updated":
+        const customerSubscriptionUpdated = event.data.object;
+
+        if (customerSubscriptionUpdated.status === "canceled") {
+          await supabaseAdmin
+            .from("profile")
+            .update({
+              is_subscribed: false,
+              interval: null,
+            })
+            .eq("stripe_customer", event.data.object.customer);
+          break;
+        } else {
+          await supabaseAdmin
+            .from("profile")
+            .update({
+              is_subscribed: true,
+              interval: customerSubscriptionUpdated.items.data[0].plan.interval,
+            })
+            .eq("stripe_customer", event.data.object.customer);
+          break;
+        }
+      case "customer.subscription.deleted":
+        await supabaseAdmin
+          .from("profile")
+          .update({
+            is_subscribed: false,
+            interval: null,
+          })
+          .eq("stripe_customer", event.data.object.customer);
         break;
-      case "customer.discount.updated":
-        break;
-      default:
-        console.log(`Unhandled event type ${event.type}`);
     }
     return NextResponse.json({ recieved: true });
-  } catch (err: any) {
-    return NextResponse.json(`webhook Error: ${err.message}`, { status: 401 });
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      return NextResponse.json(`webhook Error: ${err.message}`, {
+        status: 401,
+      });
+    }
+    return NextResponse.json("Unknown webhook error", { status: 401 });
   }
 }
