@@ -4,10 +4,11 @@ import AuthClientButton from "./AuthClientButton";
 import { Database } from "@/lib/database.types";
 
 const AuthServerButton = async () => {
-  const supabase = createServerComponentClient<Database>({cookies});
+  const supabase = createServerComponentClient<Database>({
+    cookies: () => cookies(),
+  });
   const { data: user } = await supabase.auth.getSession();
   const session = user.session;
-  
 
   return <AuthClientButton session={session} />;
 };

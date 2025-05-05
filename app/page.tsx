@@ -5,8 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Database } from "@/lib/database.types";
 
 export default async function Home() {
-  // const cookieStore = cookies();
-  const supabase = createServerComponentClient<Database>({cookies});
+  const supabase = createServerComponentClient<Database>({ 
+    cookies: () => cookies() 
+  });
   const { data: lessons } = await supabase.from("lesson").select("*");
 
   return (
