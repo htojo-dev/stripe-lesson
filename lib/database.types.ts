@@ -30,6 +30,32 @@ export type Database = {
         }
         Relationships: []
       }
+      premium_content: {
+        Row: {
+          created_at: string
+          id: number
+          video_url: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          video_url?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "premium_content_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "lesson"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profile: {
         Row: {
           created_at: string
