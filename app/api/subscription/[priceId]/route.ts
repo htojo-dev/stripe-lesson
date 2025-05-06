@@ -3,25 +3,28 @@ import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import Stripe from "stripe";
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { priceId: string } }
-) {
+// GET メソッドでは context.params は使えません
+export async function GET(req: NextRequest) {
+  const url = new URL(req.url);
+  const priceId = url.pathname.split("/").pop(); // [priceId] をパスから抽出
+
+  if (!priceId) {
+    return NextResponse.json({ error: "Missing priceId" }, { status: 400 });
+  }
+
   const supabase = createRouteHandlerClient({ cookies });
   const { data } = await supabase.auth.getUser();
   const user = data.user;
 
   if (!user) {
-    return NextResponse.json("Unauthrized", { status: 401 });
+    return NextResponse.json("Unauthorized", { status: 401 });
   }
 
   const { data: stripe_customer_data } = await supabase
     .from("profile")
     .select("stripe_customer")
-    .eq("id", user?.id)
+    .eq("id", user.id)
     .single();
-
-  const priceId = params.priceId;
 
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 

@@ -32,7 +32,7 @@ const getPremiumContent = async (
   return video;
 };
 
-const LessonDetailPage = async ({ params }: { params: { id: number } }) => {
+const LessonDetailPage = async ({ params }: { params: Promise<{ id: number }> }) => {
   const parmas = await params;
   const supabase = createServerComponentClient<Database>({
     cookies: () => cookies(),
